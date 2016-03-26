@@ -1,1 +1,1 @@
-This branch contains the completed code for the [NativeScript getting started guide](http://docs.nativescript.org/getting-started).
+This branch contains a test app using NativeScript to develop in iOS and Android
