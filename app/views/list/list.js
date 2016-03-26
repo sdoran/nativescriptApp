@@ -2,30 +2,29 @@ var dialogsModule = require("ui/dialogs");
 var Observable = require("data/observable").Observable;
 var GroceryListViewModel = require("../../shared/view-models/grocery-list-view-model");
 var socialShare = require("nativescript-social-share");
-var swipeDelete = require("../../shared/utils/ios-swipe-delete");
+var swipeToJudge = require("../../shared/utils/ios-swipe-judge");
 var page;
 
-var groceryList = new GroceryListViewModel([]);
+var scoreList = new GroceryListViewModel([]);
 var pageData = new Observable({
-    groceryList: groceryList,
-    grocery: ""
+    projectList: projectList,
+    project: ""
 });
 
 exports.loaded = function(args) {
     page = args.object;
-    var listView = page.getViewById("groceryList");
+    var listView = page.getViewById("projectList");
 
     if (page.ios) {
-        swipeDelete.enable(listView, function(index) {
-            groceryList.delete(index);
+        swipeToJudge.enable(listView, function(index) {
+            projectList.judge(index);
         });
     }
     
     page.bindingContext = pageData;
 
-    groceryList.empty();
     pageData.set("isLoading", true);
-    groceryList.load().then(function() {
+    projectList.load().then(function() {
         pageData.set("isLoading", false);
         listView.animate({
             opacity: 1,
@@ -34,41 +33,19 @@ exports.loaded = function(args) {
     });
 };
 
-exports.add = function() {
-    // Check for empty submissions
-    if (pageData.get("grocery").trim() !== "") {
-        // Dismiss the keyboard
-        page.getViewById("grocery").dismissSoftInput();
-        groceryList.add(pageData.get("grocery"))
-            .catch(function(error) {
-                console.log(error);
-                dialogsModule.alert({
-                    message: "An error occurred while adding an item to your list.",
-                    okButtonText: "OK"
-                });
-            });
-        // Empty the input field
-        pageData.set("grocery", "");
-    } else {
-        dialogsModule.alert({
-            message: "Enter a grocery item",
-            okButtonText: "OK"
-        });
-    }
+
+exports.sync = function () {
+  var list = [];
+  var finalList = "";
+  for (var i = 0, size = scoreList.length; i < size ; i++) {
+    list.push(scoreList.getItem(i).name);
+  }
+  var listString = list.join(", ").trim();
+  socialShare.shareText(listString);
 };
 
-exports.share = function() {
-    var list = [];
-    var finalList = "";
-    for (var i = 0, size = groceryList.length; i < size ; i++) {
-        list.push(groceryList.getItem(i).name);
-    }
-    var listString = list.join(", ").trim();
-    socialShare.shareText(listString);
-};
-
-exports.delete = function(args) {
+exports.judge = function(args) {
     var item = args.view.bindingContext;
-    var index = groceryList.indexOf(item);
-    groceryList.delete(index);
+    var index = projectLiset.indexOf(item);
+    projectList.judge(index);
 };
